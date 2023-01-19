@@ -9,7 +9,14 @@ from disnake.ext import commands
 
 
 
+class NoGlobalsError(Exception):
+    """The exception raised when the globals aren't initialized yet."""
+    def __init__(self):
+        super().__init__("The global variables aren't initialized yet.")
+
+
 class Globals():
+    """Class that constructs the global object responsible for storing all global variables."""
     _main_instance: Globals | None = None
 
     def __init__(self):
@@ -62,4 +69,6 @@ class Globals():
 
     @classmethod
     def get_globals(cls):
+        if cls._main_instance is None:
+            raise NoGlobalsError()
         return cls._main_instance
