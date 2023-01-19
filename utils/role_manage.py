@@ -175,8 +175,8 @@ def database_update(action, user, role=None, roleIcon=None):
 
 class DisplayTypes(enum.Enum):
     """Contains the display types that can be used."""
-    role = "Role"
-    role_icon = "RoleIcon"
+    ROLE = "Role"
+    ROLE_ICON = "RoleIcon"
 
 async def _roles(
     inter: disnake.UserCommandInteraction,
@@ -262,8 +262,6 @@ async def _roles(
         Menu = None
 
     roleStrList = ''
-    PageDown = None
-    PageUp = None
 
     true_length = len(true_items)
     if len(true_items) > 0:
@@ -309,6 +307,6 @@ async def _roles(
         return embed
     elif len(true_items) > 0 and not user:
         print(aList)
-        message = await inter.edit_original_message(components=aList, embed=embed)
+        await inter.edit_original_message(components=aList, embed=embed)
     else:
-        message = await inter.edit_original_message(embed=embed)
+        await inter.edit_original_message(embed=embed)
