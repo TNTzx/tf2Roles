@@ -1,12 +1,17 @@
 """Contains the globals used across the program."""
 
 
+from __future__ import annotations
+
+
 import disnake
 from disnake.ext import commands
 
 
 
 class Globals():
+    _main_instance: Globals | None = None
+
     def __init__(self):
         self.intents = disnake.Intents.default()
         self.intents.guilds = True
@@ -50,3 +55,11 @@ class Globals():
         )
 
         self.guilds = [770428394918641694, 296802696243970049]
+
+
+        type(self)._main_instance = self
+
+
+    @classmethod
+    def get_globals(cls):
+        return cls._main_instance
