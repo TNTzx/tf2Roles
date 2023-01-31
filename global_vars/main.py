@@ -61,7 +61,7 @@ class Globals():
             activity = self.activity
         )
 
-        self.guilds = [770428394918641694, 296802696243970049]
+        # self.guilds = [770428394918641694, 296802696243970049]
 
 
         type(self)._main_instance = self
@@ -69,6 +69,12 @@ class Globals():
 
     @classmethod
     def get_globals(cls):
+        """Gets the object that stores all global variables."""
         if cls._main_instance is None:
             raise NoGlobalsError()
         return cls._main_instance
+
+
+    def get_guild_ids(self):
+        """Gets all guilds joined by the bot."""
+        return [guild.id for guild in self.bot.guilds]
