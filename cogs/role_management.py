@@ -31,23 +31,24 @@ class CogRoleManagement(commands.Cog):
             await inter.response.send_message(
                 utils.getLang(inter, section='Translation', line='GIVE_ROLE_FAILED_BLACKLIST'),
                 ephemeral=True
-            ),
+            )
             return
 
         user_roles, _ = utils.get_user_roles(member.id)
         if role.id in user_roles:
             await inter.response.send_message(
                 utils.getLang(
-                    inter, section='Translation', line=f'GIVE_ROLE_FAILED_EXISTS'
+                    inter, section='Translation', line='GIVE_ROLE_FAILED_EXISTS'
                 ).format(member.mention, role.mention),
                 ephemeral=True
-            ),
+            )
             return
 
         await inter.response.send_message(
-            utils.getLang(inter, section='Translation', line=f'GIVE_ROLE_SUCCESS').format(member.mention, role.mention)
+            utils.getLang(inter, section='Translation', line='GIVE_ROLE_SUCCESS').format(member.mention, role.mention)
         )
 
+        # TODO should change this algorithm
         for role_to_add in roles_to_add:
             for master_role in GLOBALS.masterRoles:
                 primary, secondary = master_role
@@ -63,26 +64,26 @@ class CogRoleManagement(commands.Cog):
     async def removerole(self, inter: disnake.UserCommandInteraction, member: disnake.Member, role: disnake.Role):
         if role.name == '@everyone':
             await inter.response.send_message(
-                utils.getLang(inter, section='Translation', line=f'REMOVE_ROLE_FAILED_EVERYONE'),
+                utils.getLang(inter, section='Translation', line='REMOVE_ROLE_FAILED_EVERYONE'),
                 ephemeral=True
             )
             return
 
-        user_roles, trash = utils.get_user_roles(member.id)
+        user_roles, _ = utils.get_user_roles(member.id)
         if role.id not in user_roles:
             await inter.response.send_message(
                 utils.getLang(
-                    inter, section='Translation', line=f'REMOVE_ROLE_FAILED_MISSING'
+                    inter, section='Translation', line='REMOVE_ROLE_FAILED_MISSING'
                 ).format(member.mention, role.mention),
                 ephemeral=True
             )
             return
 
         if inter.locale == 'ko':
-            tempF = utils.getLang(inter, section='Translation', line='REMOVE_ROLE_SUCCESS').format(member.mention, role.mention)
+            message_str = utils.getLang(inter, section='Translation', line='REMOVE_ROLE_SUCCESS').format(member.mention, role.mention)
         else:
-            tempF = utils.getLang(inter, section='Translation', line='REMOVE_ROLE_SUCCESS').format(role.mention, member.mention)
-        await inter.response.send_message(tempF)
+            message_str = utils.getLang(inter, section='Translation', line='REMOVE_ROLE_SUCCESS').format(role.mention, member.mention)
+        await inter.response.send_message(message_str)
         utils.database_update("remove", user=member.id, role=role.id)
         await member.remove_roles(role, reason=f'Role removed by {inter.author} ({inter.author.id})')
 
@@ -92,31 +93,31 @@ class CogRoleManagement(commands.Cog):
     async def addroleicon(self, inter: disnake.UserCommandInteraction, member: disnake.Member, role: disnake.Role):
         if role.name == '@everyone':
             await inter.response.send_message(
-                utils.getLang(inter, section='Translation', line=f'GIVE_ROLE_FAILED_EVERYONE'),
+                utils.getLang(inter, section='Translation', line='GIVE_ROLE_FAILED_EVERYONE'),
                 ephemeral=True
             )
             return
 
-        trash, bl_role = utils.get_user_roles(9)
+        _, bl_role = utils.get_user_roles(9)
         if role.id in bl_role:
             await inter.response.send_message(
-                utils.getLang(inter, section='Translation', line=f'GIVE_ROLE_FAILED_BLACKLIST'),
+                utils.getLang(inter, section='Translation', line='GIVE_ROLE_FAILED_BLACKLIST'),
                 ephemeral=True
             )
             return
 
-        trash, user_icons = utils.get_user_roles(member.id)
+        _, user_icons = utils.get_user_roles(member.id)
         if role.id in user_icons:
             await inter.response.send_message(
                 utils.getLang(
-                    inter, section='Translation', line=f'GIVE_ROLE_FAILED_EXISTS'
+                    inter, section='Translation', line='GIVE_ROLE_FAILED_EXISTS'
                 ).format(member.mention, role.mention),
                 ephemeral=True
-            ),
+            )
             return
 
         await inter.response.send_message(
-            utils.getLang(inter, section='Translation', line=f'GIVE_ICON_SUCCESS').format(member.mention, role.mention)
+            utils.getLang(inter, section='Translation', line='GIVE_ICON_SUCCESS').format(member.mention, role.mention)
         )
         utils.database_update("add", user=member.id, roleIcon=role.id)
 
