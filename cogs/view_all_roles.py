@@ -1,4 +1,4 @@
-"""Contains the cog for viewing roles."""
+"""Contains the cog for commands for viewing roles."""
 
 
 import disnake
@@ -12,7 +12,7 @@ from .. import utils
 GLOBALS = global_vars.Globals.get_globals()
 
 
-class CogViewRole(commands.Cog):
+class CogViewRoleGeneral(commands.Cog):
     """Contains all commands relating to viewing roles."""
 
     @GLOBALS.bot.user_command(name='View Roles', guild_ids=GLOBALS.guilds)
