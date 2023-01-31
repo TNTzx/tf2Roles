@@ -120,7 +120,7 @@ def get_user_roles(user, skip=False):
                 database_update('remove', user, role=ix)
                 roleIcons.remove(ix)
 
-        bl, trash = get_user_roles(9, skip=True)
+        bl, _ = get_user_roles(9, skip=True)
         to_blacklist = False
         for i in roles:
             if i in bl:
@@ -139,8 +139,7 @@ def database_update(action, user, role=None, roleIcon=None):
     conn = sqlite3.connect('roles.db')
     cur = conn.cursor()
 
-    sql = '''SELECT role, roleicon FROM roles WHERE user IS ?'''
-    cur.execute(sql, [user])  # Gets all roles & role icons from the user.
+    cur.execute('''SELECT role, roleicon FROM roles WHERE user IS ?''', [user])  # Gets all roles & role icons from the user.
 
     roles, roleIcons = get_user_roles(user, skip=True)
 
@@ -165,10 +164,8 @@ def database_update(action, user, role=None, roleIcon=None):
     else:
         return False
 
-    sql2 = '''UPDATE roles SET role = ? WHERE user IS ?'''
-    cur.execute(sql2, [json.dumps(roles), user])
-    sql3 = '''UPDATE roles SET roleicon = ? WHERE user IS ? '''
-    cur.execute(sql3, [json.dumps(roleIcons), user])
+    cur.execute('''UPDATE roles SET role = ? WHERE user IS ?''', [json.dumps(roles), user])
+    cur.execute('''UPDATE roles SET roleicon = ? WHERE user IS ? ''', [json.dumps(roleIcons), user])
     conn.commit()
 
 
@@ -178,30 +175,32 @@ class DisplayTypes(enum.Enum):
     ROLE = "Role"
     ROLE_ICON = "RoleIcon"
 
-async def _roles(
-    inter: disnake.UserCommandInteraction,
-    display_type: DisplayTypes,
-    returnEmbed = False,
-                 user=False, page=1,
-                 defer=True):  # Lists a players' roles & role icons and allows them to choose between them.
+async def display_roles(
+        inter: disnake.UserCommandInteraction,
+        display_type: DisplayTypes,
+        returnEmbed = False,
+        user=False,
+        page=1,
+        defer=True
+    ):
+    """Lists a players' roles & role icons and allows them to choose between them."""
 
-    if page < 1:
-        page = 1
+    page = max(page, 1)
 
     if not returnEmbed and defer:
         await inter.response.defer(ephemeral=True)
 
     if user:
-
         if isinstance(user, int):
-            id = user
+            user_id = user
         else:
-            id = user.id
-            if id == inter.author.id:
+            user_id = user.id
+            if user_id == inter.author.id:
                 user = False
     else:
-        id = inter.author.id
-    roles, roleIcons = get_user_roles(id)
+        user_id = inter.author.id
+
+    roles, roleIcons = get_user_roles(user_id)
     guild = inter.guild
 
     true_items = []
@@ -220,7 +219,7 @@ async def _roles(
         try:
             role = guild.get_role(r)
             if role is None:
-                database_update('remove', id, role=r)
+                database_update('remove', user_id, role=r)
             else:
                 true_items.append(role)
         except Exception as e:
@@ -230,31 +229,31 @@ async def _roles(
         page = 1
 
     true_items.sort(reverse=True)
-
     true_items_shortened = true_items[(page - 1) * 25:(page * 25)]
 
     aList = []
 
     if not returnEmbed and not user:
-
         rarities = translation.getLang(inter, 'Translation', 'RARITY_LIST').split(', ')
-
         Menu = disnake.ui.Select()
         options = []
         for r in true_items_shortened:
             print(r.name, r.id)
             if r.id == GLOBALS.default_role:
                 name = translation.getLang(inter, 'Translation', 'NO_ICON')
-                desc = (translation.getLang(inter, 'Translation', 'NO_ICON_DESC'))
-                temp = disnake.SelectOption(label=name, value=f'{shortType}_{r.id}', description=desc)
+                desc = translation.getLang(inter, 'Translation', 'NO_ICON_DESC')
+                temp = disnake.SelectOption(label = name, value = f'{shortType}_{r.id}', description = desc)
             else:
                 quality = random.choice(rarities)
                 level = random.randint(0, 100)
                 name = r.name
-                temp = disnake.SelectOption(label=r.name, value=f'{shortType}_{r.id}',
-                                            description=translation.getLang(inter, 'Translation', 'ITEM_RARITY').format(level, quality,
-                                                                                                            r.name))
+                temp = disnake.SelectOption(
+                    label=r.name,
+                    value=f'{shortType}_{r.id}',
+                    description=translation.getLang(inter, 'Translation', 'ITEM_RARITY').format(level, quality, r.name)
+                )
             options.append(temp)
+
         Menu.options = options
         Menu.custom_id = 'role_select'
         aList.append(Menu)
@@ -286,7 +285,7 @@ async def _roles(
     else:
         type_plural = translation.getLang(inter, section='Translation', line=f'{display_type.upper()}')
 
-    if id == 9:
+    if user_id == 9:
         embTitle = translation.getLang(inter, section='Translation', line='ROLES_LIST_BLACKLIST').format(true_length,
                                                                                              type_plural)
     elif user and not isinstance(user, int):
