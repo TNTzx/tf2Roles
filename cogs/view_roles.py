@@ -1,4 +1,4 @@
-"""Contains the cog for commands for viewing a user's available roles."""
+"""Contains the cog for commands for viewing roles."""
 
 
 import disnake
@@ -12,8 +12,18 @@ from .. import utils
 GLOBALS = global_vars.Globals.get_globals()
 
 
-class CogViewUserRoles(commands.Cog):
-    """Contains all commands relating to viewing a user's roles."""
+class CogViewRoleGeneral(commands.Cog):
+    """Contains all commands relating to viewing roles."""
+
+    @GLOBALS.bot.user_command(name='View Roles', guild_ids=GLOBALS.guilds)
+    async def view_role_context(self, inter: disnake.UserCommandInteraction):
+        await utils.display_roles(inter, display_type = utils.DisplayTypes.ROLE, user = inter.target)
+
+
+    @GLOBALS.bot.user_command(name='View Role Icons', guild_ids=GLOBALS.guilds)
+    async def view_roleicon_context(self, inter):
+        await utils.display_roles(inter, display_type = utils.DisplayTypes.ROLE_ICON, user = inter.target)
+
 
     @GLOBALS.bot.slash_command(
         description='Allows you to manage your active role, or view the roles of other users.',
